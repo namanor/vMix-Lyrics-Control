@@ -1,0 +1,144 @@
+<!doctype html>
+<html class="no-js" lang="en">  
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Lyrics</title>
+    <link rel="manifest" href="/manifest.json">
+    <link rel="stylesheet" href="css/foundation.css" />
+    <link rel="stylesheet" href="css/custom.css" />
+    <link href='http://fonts.googleapis.com/css?family=Raleway:100' rel='stylesheet' type='text/css'>
+    <script src="js/vendor/modernizr.js"></script>
+    <script src="js/vendor/jquery.js"></script>    
+    
+  </head>
+  <body>    
+    <header></header>
+
+    <div class="container">
+      <ul class="child">
+          <li><div id="Opening" class="shortcutButton song"><span>Opening</span></div></li>
+          <li><div id="Gift" class="shortcutButton song"><span>Gift</span></li>
+      </ul>
+      <ul  class="child">
+        <li><div id="Communion" class="shortcutButton song"><span>Communion</span></li>
+        <li><div id="Closing" class="shortcutButton song"><span>Closing</span></li>
+      </ul>
+      <ul class="child">
+          <li>
+              <div id="prev" class="shortcutButton nextPrev"><span>Prev (-)</span></div>
+          </li>
+          <li>
+              <div id="next" class="shortcutButton nextPrev"><span>Next (+)</span></div>
+          </li>
+      </ul>
+      <ul>
+          <li><div id="out" class="shortcutButton closeButton"><span>Close Lyrics</span></div></li>
+      </ul>
+      <label id="info" class="child hidden"></label>
+      
+    </div>
+
+    <div id="installContainer" class="hidden">
+      <button id="butInstall" type="button">
+        Install
+      </button>
+    </div>
+
+    <script src="js/foundation.min.js"></script>
+    <script src="js/script.js"></script>
+    <script>
+      $(document).foundation();
+    </script>
+    <script>
+      window.addEventListener('load', () => {
+      registerSW();
+      });
+    
+      // Register the Service Worker
+      async function registerSW() {
+      if ('serviceWorker' in navigator) {
+        try {
+        await navigator
+            .serviceWorker
+            .register('serviceworker.js');
+        }
+        catch (e) {
+        console.log('SW registration failed');
+        }
+      }
+      }
+    </script>
+    
+    <script>        
+        const dataTable = "data"
+        var url = "";
+        var selectedSong = "";
+
+        let elements = document.getElementsByClassName("shortcutButton");
+
+        for(let item of elements){
+            item.onclick= function() {myFunction(item)};
+        }        
+
+        function myFunction(item){                       
+
+            switch(item.id){
+                case 'Opening':
+                case 'Gift':
+                case 'Closing':
+                case 'Communion':
+                    console.log("song button");
+                    startLyric(item.id);
+                    break;
+                case 'next':
+                  console.log("next");
+                  callNext();
+                  break;
+                case 'prev':
+                  callPrev();
+                  console.log("prev");
+                  break; 
+                case 'out':
+                  onClose();
+                  break;
+            }
+        }  
+        
+        function startLyric(song){
+          let baseUrl = "http://" + location.host.split(":")[0];
+          url = `${baseUrl}:8088/api/?Function=`;
+
+          document.getElementById("info").innerHTML = song; 
+          selectedSong = song;
+
+          $(`#${selectedSong}`).addClass("activeSong");
+          $(`#${song}`).addClass("activeSong");
+          vmix(`DataSourceNextRow&Value=${dataTable},${selectedSong}`);
+          setTimeout(()=>{vmix(`DataSourceSelectRow&Value=${dataTable},${selectedSong},2`)},50);
+          setTimeout(()=>{vmix(`OverlayInput1In&Input=${selectedSong}Lyric`)}, 250);   
+                  
+        }
+       
+        function callNext(){
+          console.log(selectedSong);
+          vmix(`DataSourceNextRow&Value=${dataTable},${selectedSong}`);
+        }
+
+        function callPrev(){
+          vmix(`DataSourcePreviousRow&Value=${dataTable},${selectedSong}`);
+        }
+        
+        function onClose(){
+          $("div").removeClass("activeSong");
+          vmix("OverlayInput1Out");
+        }
+
+
+        function vmix(cmdData){
+          fetch(`${url}${cmdData}`);
+        }
+
+    </script>
+  </body>
+</html>
