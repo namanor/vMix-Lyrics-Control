@@ -44,7 +44,7 @@ header {
 }
 
 .song {
-  background-color: red;
+  background-color: rgb(121, 115, 115);
   width: 120px;
 }
 
@@ -89,8 +89,9 @@ ul li {
 ul li span {
   color: #fff;
   margin: 0.5em;
-  font-size: 1.1em;
+  font-size: 1.7em;
   text-transform: uppercase;
+  user-select: none;
 }
 
 .hidden {
